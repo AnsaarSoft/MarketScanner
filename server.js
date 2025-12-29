@@ -3,6 +3,7 @@ const ws = require('ws');
 const dbContext = require('./dbContext');
 const prdMsg = require('./productMessages');
 const path = require('path');
+const nodemailer = require('nodemailer');
 const dotenvResult = require('dotenv').config({ path: path.join(__dirname, 'EnvironmentVariable.env') });
 if (dotenvResult.error) {
     console.warn('⚠️ dotenv: failed to load EnvironmentVariable.env -', dotenvResult.error.message || dotenvResult.error);
@@ -10,9 +11,8 @@ if (dotenvResult.error) {
     console.log('✅ dotenv loaded env from EnvironmentVariable.env');
 }
 // debug-print presence of key SMTP vars (do NOT log secrets in production)
-console.log(`SMTP_HOST: ${process.env.SMTP_HOST ? process.env.SMTP_HOST : '<not set>'}`);
-console.log(`EMAIL_TO: ${process.env.EMAIL_TO ? process.env.EMAIL_TO : '<not set>'}`);
-const nodemailer = require('nodemailer');
+//console.log(`SMTP_HOST: ${process.env.SMTP_HOST ? process.env.SMTP_HOST : '<not set>'}`);
+//console.log(`EMAIL_TO: ${process.env.EMAIL_TO ? process.env.EMAIL_TO : '<not set>'}`);
 
 
 const app = express();
