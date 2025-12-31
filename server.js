@@ -4,15 +4,6 @@ const dbContext = require('./dbContext');
 const prdMsg = require('./productMessages');
 const path = require('path');
 const dotenvResult = require('dotenv').config({ path: path.join(__dirname, 'EnvironmentVariable.env') });
-if (dotenvResult.error) {
-    console.warn('⚠️ dotenv: failed to load EnvironmentVariable.env -', dotenvResult.error.message || dotenvResult.error);
-} else {
-    console.log('✅ dotenv loaded env from EnvironmentVariable.env');
-}
-// debug-print presence of key SMTP vars (do NOT log secrets in production)
-console.log(`SMTP_HOST: ${process.env.SMTP_HOST ? process.env.SMTP_HOST : '<not set>'}`);
-console.log(`EMAIL_TO: ${process.env.EMAIL_TO ? process.env.EMAIL_TO : '<not set>'}`);
-const nodemailer = require('nodemailer');
 
 
 const app = express();
@@ -30,7 +21,8 @@ app.listen(Port, () => {
 
 const symbol = process.env.Symbol || "btcusdt";
 const interval = process.env.Period || "1m";
-const binanceWsUrl = `wss://stream.binance.com:9443/ws/${symbol}@kline_${interval}`;
+//const binanceWsUrl = `wss://stream.binance.com:9443/ws/${symbol}@kline_${interval}`;
+const binanceWsUrl = `wss://stream.binance.us:9443/ws/${symbol}@kline_${interval}`;
 
 const wss = new ws(binanceWsUrl);
 
@@ -56,12 +48,12 @@ wss.on("message", async (msg) => {
             dbContext.insertCandle(candle);
             dbContext.calculateAndUpdateEMA();
             const hasCrossed = dbContext.CrossOccured();
-            if (hasCrossed) {
+            if (candle.isClosed) {
                 const trend = dbContext.direction === 1 ? "bullish" : "bearish";
                 const timestamp = `${candle.bardate} ${candle.bartime}`;
                 console.log(`[${timestamp}] EMA cross detected: ${trend}.`);
                 // send email notification (if configured)
-                SendEMail(trend, timestamp, message.s).catch(err => console.error('❗ SendEMail error:', err.message));
+                prdMsg.SendEmail(trend, timestamp, message.s).catch(err => console.error('❗ SendEmail error:', err.message));
             }
             else{
                 const trend = dbContext.direction === 1 ? "bullish" : "bearish";
@@ -76,39 +68,8 @@ wss.on("message", async (msg) => {
 
 });
 
-// ✅ SendEMail: sends an email notification when EMA cross occurs
-async function SendEMail(trend, timestamp, symbol) {
-    const to = process.env.EMAIL_TO;
-    const from = process.env.EMAIL_FROM || process.env.SMTP_USER;
-    if (!to) {
-        console.warn('⚠️ EMAIL_TO not set. Skipping email send.');
-        return;
-    }
-    if (!process.env.SMTP_HOST) {
-        console.warn('⚠️ SMTP configuration missing (SMTP_HOST). Skipping email send.');
-        return;
-    }
-    try {
-        const transporter = nodemailer.createTransport({
-            host: process.env.SMTP_HOST,
-            port: parseInt(process.env.SMTP_PORT || '587', 10),
-            secure: (process.env.SMTP_SECURE === 'true'),
-            auth: process.env.SMTP_USER ? {
-                user: process.env.SMTP_USER,
-                pass: process.env.SMTP_PASS
-            } : undefined
-        });
 
-        const subject = `EMA cross detected: ${trend} (${symbol})`;
-        const text = `EMA cross detected for ${symbol}.\nTrend: ${trend}\nTime: ${timestamp}`;
-        const html = `<p>EMA cross detected for <strong>${symbol}</strong>.</p><p>Trend: <strong>${trend}</strong></p><p>Time: ${timestamp}</p>`;
 
-        const info = await transporter.sendMail({ from, to, subject, text, html });
-        console.log('📧 Email sent:', info.messageId || info.response);
-    } catch (err) {
-        console.error('❗ Failed to send email:', err.message || err);
-    }
-}
 
 // continue with websocket events
 wss.on("open", () => {
