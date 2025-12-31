@@ -3,6 +3,7 @@ const ws = require('ws');
 const dbContext = require('./dbContext');
 const prdMsg = require('./productMessages');
 const path = require('path');
+const nodemailer = require('nodemailer');
 const dotenvResult = require('dotenv').config({ path: path.join(__dirname, 'EnvironmentVariable.env') });
 
 
