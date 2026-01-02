@@ -2,7 +2,7 @@ const nodemailer = require('nodemailer');
 const https = require('https');
 
 // ✅ SendEMail: sends an email notification when EMA cross occurs                                                                                                                      
-async function SendEmail(trend, timestamp, symbol) {
+async function SendEmail(trend, timestamp, symbol, currentPrice, entry, takeProfit, stopLoss) {
     const to = process.env.EMAIL_TO;
     const from = process.env.EMAIL_FROM || process.env.SMTP_USER;
     if (!to) {
@@ -25,8 +25,8 @@ async function SendEmail(trend, timestamp, symbol) {
         });
 
         const subject = `EMA cross detected: ${trend} (${symbol})`;
-        const text = `EMA cross detected for ${symbol}.\nTrend: ${trend}\nTime: ${timestamp}`;
-        const html = `<p>EMA cross detected for <strong>${symbol}</strong>.</p><p>Trend: <strong>${trend}</strong></p><p>Time: ${timestamp}</p>`;
+        const text = `EMA Cross detected\nTrend: ${trend}\nCurrent Price @ ${currentPrice}\nEntry @ ${entry}\nTake Profit @ ${takeProfit}\nStop Loss @ ${stopLoss}`;
+        const html = `<p><strong>EMA Cross detected</strong></p><p>Trend: <strong>${trend}</strong></p><p>Current Price @ ${currentPrice}</p><p>Entry @ ${entry}</p><p>Take Profit @ ${takeProfit}</p><p>Stop Loss @ ${stopLoss}</p>`;
 
         const info = await transporter.sendMail({ from, to, subject, text, html });
         console.log('📧 Email sent:', info.messageId || info.response);
