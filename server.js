@@ -49,7 +49,7 @@ wss.on("message", async (msg) => {
             dbContext.insertCandle(candle);
             dbContext.calculateAndUpdateEMA();
             const hasCrossed = dbContext.CrossOccured();
-            if (candle.isClosed) {
+            if (hasCrossed) {
                 const trend = dbContext.direction === 1 ? "bullish" : "bearish";
                 const timestamp = `${candle.bardate} ${candle.bartime}`;
                 console.log(`[${timestamp}] EMA cross detected: ${trend}.`);
@@ -59,6 +59,7 @@ wss.on("message", async (msg) => {
                 const takeProfit = parseFloat((candle.close + (candle.close * 0.0015)).toFixed(2));
                 const stopLoss = parseFloat((candle.close - (candle.close * 0.0015)).toFixed(2));
                 await prdMsg.SendEmail(trend, timestamp, message.s, currentPrice, entry, takeProfit, stopLoss).catch(err => console.error('❗ SendEmail error:', err.message));
+                //prdMsg.SendTelegram(trend, timestamp, message.s, currentPrice, entry, takeProfit, stopLoss);
             }
             else{
                 const trend = dbContext.direction === 1 ? "bullish" : "bearish";

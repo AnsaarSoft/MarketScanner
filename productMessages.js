@@ -36,7 +36,7 @@ async function SendEmail(trend, timestamp, symbol, currentPrice, entry, takeProf
 }
         
   // ✅ SendTelegram: sends a message via Telegram bot when EMA cross occurs
-function SendTelegram(trend, timestamp, symbol) {
+function SendTelegram(trend, timestamp, symbol, currentPrice, entry, takeProfit, stopLoss) {
   const token = process.env.TELEGRAM_BOT_TOKEN;
   const chatId = process.env.TELEGRAM_CHAT_ID;
   if (!token || !chatId) {
@@ -44,7 +44,7 @@ function SendTelegram(trend, timestamp, symbol) {
     return;
   }
 
-  const text = `EMA cross detected for ${symbol}.\nTrend: ${trend}\nTime: ${timestamp}`;
+  const text = `EMA Cross detected\nTrend: ${trend}\nCurrent Price @ ${currentPrice}\nEntry @ ${entry}\nTake Profit @ ${takeProfit}\nStop Loss @ ${stopLoss}`;
   const payload = JSON.stringify({ chat_id: chatId, text, parse_mode: 'HTML' });
 
   const options = {
