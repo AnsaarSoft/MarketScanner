@@ -44,7 +44,7 @@ function SendTelegram(trend, timestamp, symbol, currentPrice, entry, takeProfit,
     return;
   }
 
-  const text = `EMA Cross detected\nTrend: ${trend}\nCurrent Price @ ${currentPrice}\nEntry @ ${entry}\nTake Profit @ ${takeProfit}\nStop Loss @ ${stopLoss}`;
+  const text = `EMA 20/50 Cross \nTrend: ${trend}\nCurrent Price @ ${currentPrice}\nEntry @ ${entry}\nTake Profit @ ${takeProfit}\nStop Loss @ ${stopLoss}`;
   const payload = JSON.stringify({ chat_id: chatId, text, parse_mode: 'HTML' });
 
   const options = {
@@ -64,7 +64,7 @@ function SendTelegram(trend, timestamp, symbol, currentPrice, entry, takeProfit,
       try {
         const json = JSON.parse(body);
         if (json && json.ok) {
-          console.log('💬 Telegram sent:', json.result?.message_id);
+          //console.log('💬 Telegram sent:', json.result?.message_id);
         } else {
           console.error('❗ Telegram API error:', json && json.description ? json.description : body);
         }
